@@ -14,7 +14,7 @@ let package = Package(
     // .package(path: "../easybar-kit")
     .package(
       url: "https://github.com/easybar-app/easybar-kit",
-      from: "0.54.0",
+      from: "0.53.2",
     )
   ],
   targets: [
