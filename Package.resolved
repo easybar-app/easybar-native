@@ -1,13 +1,13 @@
 {
-  "originHash" : "d3d666d14fa75d7b7d89c2e773b0e178d4ceb041e0b85c5dd94c80bbab90140b",
+  "originHash" : "af8ae2db2eabc0fa3fe2023acd3d595fb14b78d1b9ede369691f2658a2ff9f9a",
   "pins" : [
     {
       "identity" : "easybar-kit",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/easybar-app/easybar-kit",
       "state" : {
-        "revision" : "41bf8dc9a104b43475c507216e74314f04a0e2c8",
-        "version" : "0.53.2"
+        "revision" : "59315fef0779656b31eaa21d01a08a4776af27ec",
+        "version" : "0.1.0"
       }
     },
     {
