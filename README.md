@@ -147,5 +147,3 @@ The Native cask depends on the existing shared `easybar-calendar-agent`, `easyba
 Because the published app is currently ad-hoc signed rather than notarized, the generated cask
 removes `com.apple.quarantine` from the installed `EasyBarNative.app` before launching it. The shared
 agent formulae handle quarantine removal for their own app bundles.
-
-
