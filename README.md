@@ -14,11 +14,18 @@ The frontend reuses EasyBarKit's complete widget implementation:
 - hover, click, scroll, and context-menu interaction
 - SwiftUI widget rendering
 - custom popup panels
-- native inbox and built-in widgets
+- the host-owned native Inbox aggregation surface
 - themes and widget state
 
 A Lua widget does not need a second native-specific implementation. A top-level Lua root becomes one
-status item; a row or group below that root remains inside the same item.
+status item; a row or group below that root remains inside the same item. Lua packages are the only
+public/custom widget extension model.
+
+EasyBar Native intentionally opts into EasyBarKit's `.inboxOnly` built-in surface policy. The Inbox
+remains native because it aggregates data published by Lua packages such as `inbox-github`,
+`inbox-gitlab`, and `inbox-brew`. Regular EasyBar built-ins such as Calendar, Battery, Wi-Fi, Spaces,
+CPU, Date, Time, and Volume are not registered as Native status items. Use Lua packages for
+independent menu-bar widgets instead.
 
 Calendar and network helper agents, the Lua runtime helper, and the `easybar` CLI are shared support
 products supplied by EasyBarKit. They are not reimplemented in this repository.
@@ -140,3 +147,5 @@ The Native cask depends on the existing shared `easybar-calendar-agent`, `easyba
 Because the published app is currently ad-hoc signed rather than notarized, the generated cask
 removes `com.apple.quarantine` from the installed `EasyBarNative.app` before launching it. The shared
 agent formulae handle quarantine removal for their own app bundles.
+
+

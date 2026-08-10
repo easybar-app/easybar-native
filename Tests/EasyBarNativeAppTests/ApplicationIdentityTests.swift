@@ -15,6 +15,7 @@ final class ApplicationIdentityTests: XCTestCase {
     XCTAssertEqual(identity.logFileName, "easybar-native.out")
     XCTAssertEqual(identity.defaultConfigRelativePath, ".config/easybar-native/config.toml")
     XCTAssertEqual(identity.defaultRuntimeRelativePath, ".local/state/easybar-native/runtime")
+    XCTAssertEqual(identity.builtInSurfacePolicy, .inboxOnly)
     XCTAssertEqual(
       identity.defaultEnvironment[SharedEnvironmentKeys.calendarAgentSocketPath],
       SharedPathDefaults.calendarAgentSocketPath(in: sharedRuntimeDirectory)

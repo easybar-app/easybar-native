@@ -19,7 +19,8 @@ enum EasyBarNativeAppMain {
           SharedPathDefaults.calendarAgentSocketPath(in: sharedAgentRuntimeDirectory),
         SharedEnvironmentKeys.networkAgentSocketPath:
           SharedPathDefaults.networkAgentSocketPath(in: sharedAgentRuntimeDirectory),
-      ]
+      ],
+      builtInSurfacePolicy: .inboxOnly
     )
   }
 
