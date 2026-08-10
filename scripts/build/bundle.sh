@@ -110,7 +110,6 @@ require_dir() {
 stage_writable_file() {
   local source="$1"
   local destination="$2"
-
   install -m 0644 "$source" "$destination"
 }
 
@@ -118,6 +117,7 @@ require_command swift
 require_command install
 require_command codesign
 require_command lipo
+require_command python3
 require_command rsvg-convert "Install librsvg with: brew install librsvg"
 require_command magick "Install ImageMagick with: brew install imagemagick"
 require_command sips
@@ -191,28 +191,11 @@ app_resource_dir="$app_resources/EasyBar"
 app_themes_dir="$app_resources/Themes"
 app_bin="$app_macos/EasyBarNative"
 lua_runtime_bin="$app_macos/EasyBarLuaRuntime"
+cli_core_dir="$app_resources/EasyBarNative/CLI"
+cli_core_bin="$cli_core_dir/EasyBarCtl"
+cli_bin="$app_macos/easybar-native"
 app_plist="$app_contents/Info.plist"
 app_icon_icns="$app_resources/EasyBarNative.icns"
-
-calendar_name="EasyBarCalendarAgent"
-calendar_bundle="$dist_dir/${calendar_name}.app"
-calendar_contents="$calendar_bundle/Contents"
-calendar_macos="$calendar_contents/MacOS"
-calendar_resources="$calendar_contents/Resources"
-calendar_bin="$calendar_macos/$calendar_name"
-calendar_plist="$calendar_contents/Info.plist"
-calendar_icon_icns="$calendar_resources/${calendar_name}.icns"
-
-network_name="EasyBarNetworkAgent"
-network_bundle="$dist_dir/${network_name}.app"
-network_contents="$network_bundle/Contents"
-network_macos="$network_contents/MacOS"
-network_resources="$network_contents/Resources"
-network_bin="$network_macos/$network_name"
-network_plist="$network_contents/Info.plist"
-network_icon_icns="$network_resources/${network_name}.icns"
-
-cli_bin="$dist_dir/easybar"
 
 mkdir -p \
   "$app_macos" \
@@ -221,10 +204,7 @@ mkdir -p \
   "$app_resource_dir/ThemeTokens" \
   "$app_resource_dir/Assets" \
   "$app_themes_dir" \
-  "$calendar_macos" \
-  "$calendar_resources" \
-  "$network_macos" \
-  "$network_resources"
+  "$cli_core_dir"
 
 root_product_path() {
   local build_arch="$1"
@@ -286,19 +266,24 @@ stage_product() {
 }
 
 stage_product root EasyBarNative "$app_bin"
+stage_product root EasyBarNativeCtl "$cli_bin"
 stage_product kit EasyBarLuaRuntime "$lua_runtime_bin"
-stage_product kit EasyBarCtl "$cli_bin"
-stage_product kit EasyBarCalendarAgent "$calendar_bin"
-stage_product kit EasyBarNetworkAgent "$network_bin"
+stage_product kit EasyBarCtl "$cli_core_bin"
+chmod +x "$app_bin" "$lua_runtime_bin" "$cli_core_bin" "$cli_bin"
 
 app_version_output="$("$app_bin" --version)"
 cli_version_output="$("$cli_bin" --version)"
+core_cli_version_output="$("$cli_core_bin" --version)"
 if [ "$app_version_output" != "EasyBar Native $version" ]; then
   echo "EasyBar Native binary version mismatch: expected 'EasyBar Native $version', got '$app_version_output'" >&2
   exit 1
 fi
-if [ "$cli_version_output" != "easybar $version" ]; then
-  echo "EasyBar CLI version mismatch: expected 'easybar $version', got '$cli_version_output'" >&2
+if [ "$cli_version_output" != "easybar-native $version" ]; then
+  echo "EasyBar Native CLI version mismatch: expected 'easybar-native $version', got '$cli_version_output'" >&2
+  exit 1
+fi
+if [ "$core_cli_version_output" != "easybar $version" ]; then
+  echo "Shared CLI core version mismatch: expected 'easybar $version', got '$core_cli_version_output'" >&2
   exit 1
 fi
 echo "Verified binary versions: $app_version_output; $cli_version_output"
@@ -326,12 +311,7 @@ python3 "$project_root/scripts/build/stamp.py" lua-api \
 
 echo "Staging bundle metadata"
 require_file "$project_root/Sources/EasyBarNativeApp/Info.plist" "EasyBar Native Info.plist"
-require_file "$kit_root/Sources/EasyBarCalendarAgent/Info.plist" "calendar agent Info.plist"
-require_file "$kit_root/Sources/EasyBarNetworkAgent/Info.plist" "network agent Info.plist"
-
 stage_writable_file "$project_root/Sources/EasyBarNativeApp/Info.plist" "$app_plist"
-stage_writable_file "$kit_root/Sources/EasyBarCalendarAgent/Info.plist" "$calendar_plist"
-stage_writable_file "$kit_root/Sources/EasyBarNetworkAgent/Info.plist" "$network_plist"
 
 python3 "$project_root/scripts/build/stamp.py" plist \
   --plist "$app_plist" \
@@ -341,38 +321,19 @@ python3 "$project_root/scripts/build/stamp.py" plist \
   --name "EasyBar Native" \
   --icon-file EasyBarNative
 
-python3 "$project_root/scripts/build/stamp.py" plist \
-  --plist "$calendar_plist" \
-  --version "$version" \
-  --executable "$calendar_name" \
-  --name "$calendar_name" \
-  --icon-file "$calendar_name"
-
-python3 "$project_root/scripts/build/stamp.py" plist \
-  --plist "$network_plist" \
-  --version "$version" \
-  --executable "$network_name" \
-  --name "$network_name" \
-  --icon-file "$network_name"
-
-echo "Generating bundle icons"
+echo "Generating bundle icon"
 "$project_root/scripts/assets/app_icons.sh" \
   rsvg-convert \
   magick \
   "$dist_dir" \
-  "$kit_root/packaging/easybar-icon.svg:$app_icon_icns" \
-  "$kit_root/packaging/easybar-calendar-agent-icon.svg:$calendar_icon_icns" \
-  "$kit_root/packaging/easybar-network-agent-icon.svg:$network_icon_icns"
+  "$kit_root/packaging/easybar-icon.svg:$app_icon_icns"
 
-chmod +x "$app_bin" "$lua_runtime_bin" "$cli_bin" "$calendar_bin" "$network_bin"
-
-echo "Ad-hoc signing artifacts"
-codesign --force --deep --sign - "$calendar_bundle"
-codesign --force --deep --sign - "$network_bundle"
+echo "Ad-hoc signing app executables"
+for executable in "$lua_runtime_bin" "$cli_core_bin" "$cli_bin"; do
+  codesign --force --sign - "$executable"
+done
 codesign --force --deep --sign - "$app_bundle"
-codesign --force --sign - "$cli_bin"
-
-touch "$calendar_bundle" "$network_bundle" "$app_bundle"
+touch "$app_bundle"
 
 require_file "$app_resource_dir/Lua/runtime.lua" "staged runtime.lua"
 require_file "$app_resource_dir/Lua/easybar_api.lua" "staged Lua API stub"
@@ -380,13 +341,7 @@ require_file "$app_resource_dir/Events/event_catalog.json" "staged event catalog
 require_file "$app_resource_dir/ThemeTokens/theme_tokens.json" "staged theme tokens"
 require_file "$app_themes_dir/default.toml" "default theme"
 require_file "$app_icon_icns" "EasyBar Native icon"
-require_file "$calendar_icon_icns" "calendar agent icon"
-require_file "$network_icon_icns" "network agent icon"
 
 printf '\nBundle ready:\n'
-printf '  App:             %s\n' "$app_bundle"
-printf '  CLI:             %s\n' "$cli_bin"
-printf '  Calendar agent:  %s\n' "$calendar_bundle"
-printf '  Network agent:   %s\n' "$network_bundle"
-
-
+printf '  App:  %s\n' "$app_bundle"
+printf '  CLI:  %s\n' "$cli_bin"

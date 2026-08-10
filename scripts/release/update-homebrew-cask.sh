@@ -42,28 +42,19 @@ cask "easybar-native" do
   desc "Native macOS menu-bar frontend for EasyBarKit Lua widgets"
   homepage "https://github.com/${repository}"
 
-  depends_on formula: [
-    "easybar-calendar-agent",
-    "easybar-network-agent",
-    "lua",
-  ]
+  depends_on formula: "lua"
   depends_on macos: :sonoma
 
   postflight do
     system "xattr", "-dr", "com.apple.quarantine", "#{appdir}/EasyBarNative.app"
-    system "#{HOMEBREW_PREFIX}/bin/brew", "services", "restart", "easybar-calendar-agent"
-    system "#{HOMEBREW_PREFIX}/bin/brew", "services", "restart", "easybar-network-agent"
-  end
-
-  uninstall_preflight do
-    system "#{HOMEBREW_PREFIX}/bin/brew", "services", "stop", "easybar-calendar-agent"
-    system "#{HOMEBREW_PREFIX}/bin/brew", "services", "stop", "easybar-network-agent"
   end
 
   app "EasyBarNative.app"
+  binary "#{appdir}/EasyBarNative.app/Contents/MacOS/easybar-native", target: "easybar-native"
 
   zap trash: [
     "~/.config/easybar-native",
+    "~/.local/share/easybar-native",
     "~/.local/state/easybar-native",
   ]
 end

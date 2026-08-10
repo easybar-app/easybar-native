@@ -12,10 +12,6 @@ VERSION ?= dev
 LOCAL_INSTALL_ARCH ?= $(shell uname -m)
 LOCAL_APP_DIR ?= $(HOME)/Applications
 LOCAL_BIN_DIR ?= $(HOME)/.local/bin
-LOCAL_AGENT_DIR ?= $(HOME)/Library/Application Support/EasyBar/Agents
-LOCAL_LAUNCH_AGENT_DIR ?= $(HOME)/Library/LaunchAgents
-LOCAL_LOG_DIR ?= $(HOME)/Library/Logs/EasyBar
-LOCAL_STATE_DIR ?= $(HOME)/Library/Application Support/EasyBar/LocalInstall
 
 PACKAGE_ZIP := $(DIST_DIR)/EasyBarNative-$(VERSION).zip
 
@@ -42,7 +38,7 @@ help: ## Display this help.
 
 ##@ Build and test
 
-build: ## Build the native macOS status-item frontend.
+build: ## Build the native macOS status-item frontend and CLI launcher.
 	@$(SWIFT) build
 
 test: ## Run EasyBar Native frontend unit tests.
@@ -58,7 +54,7 @@ check: test check-concurrency lint check-release-scripts ## Run the complete rep
 
 ##@ Packaging
 
-bundle: ## Build ad-hoc-signed EasyBar Native and shared local support bundles for ARCH.
+bundle: ## Build the ad-hoc-signed EasyBar Native app with its private CLI for ARCH.
 	@scripts/build/bundle.sh \
 		--arch "$(ARCH)" \
 		--version "$(VERSION)" \
@@ -68,7 +64,7 @@ bundle: ## Build ad-hoc-signed EasyBar Native and shared local support bundles f
 package: bundle ## Create the EasyBar Native release ZIP.
 	@scripts/release/package.sh --version "$(VERSION)" --dist-dir "$(DIST_DIR)"
 
-verify: ## Verify the built native app, support artifacts, resources, versions, and architectures.
+verify: ## Verify the built app, CLI, resources, versions, and architectures.
 	@scripts/build/verify-bundle.sh --arch "$(ARCH)" --version "$(VERSION)" --dist-dir "$(DIST_DIR)"
 
 verify-release: package ## Build and verify the EasyBar Native release ZIP.
@@ -106,26 +102,19 @@ bundle-local: ## Build a complete local EasyBarNative.app using the sibling Easy
 			--bundle-id "$(BUNDLE_ID)" \
 			--dist-dir "$(DIST_DIR)"
 
-install-local: bundle-local ## Build and install EasyBarNative.app plus shared CLI/runtime/agents locally.
+install-local: bundle-local ## Build and install EasyBarNative.app and easybar-native locally.
 	@scripts/dev/install-local.sh \
 		--dist-dir "$(DIST_DIR)" \
 		--app-dir "$(LOCAL_APP_DIR)" \
-		--bin-dir "$(LOCAL_BIN_DIR)" \
-		--agent-dir "$(LOCAL_AGENT_DIR)" \
-		--launch-agent-dir "$(LOCAL_LAUNCH_AGENT_DIR)" \
-		--log-dir "$(LOCAL_LOG_DIR)" \
-		--state-dir "$(LOCAL_STATE_DIR)"
+		--bin-dir "$(LOCAL_BIN_DIR)"
 
-uninstall-local: ## Remove the standalone local EasyBar Native installation and shared local support.
+uninstall-local: ## Remove the local EasyBar Native app and CLI link.
 	@scripts/dev/uninstall-local.sh \
 		--app-dir "$(LOCAL_APP_DIR)" \
-		--bin-dir "$(LOCAL_BIN_DIR)" \
-		--agent-dir "$(LOCAL_AGENT_DIR)" \
-		--launch-agent-dir "$(LOCAL_LAUNCH_AGENT_DIR)" \
-		--state-dir "$(LOCAL_STATE_DIR)"
+		--bin-dir "$(LOCAL_BIN_DIR)"
 
-stop: ## Stop EasyBar Native and its locally installed shared helper agents.
-	@scripts/dev/stop-local.sh --dist-dir "$(DIST_DIR)"
+stop: ## Stop EasyBar Native.
+	@scripts/dev/stop-local.sh
 
 restart-app: stop ## Restart the locally installed EasyBar Native application.
 	@open "$(LOCAL_APP_DIR)/EasyBarNative.app"

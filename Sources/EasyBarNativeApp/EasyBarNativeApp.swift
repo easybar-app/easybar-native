@@ -5,9 +5,7 @@ import EasyBarShared
 @main
 enum EasyBarNativeAppMain {
   static var identity: EasyBarApplicationIdentity {
-    let sharedAgentRuntimeDirectory = SharedPathDefaults.defaultRuntimeDirectory().path
-
-    return EasyBarApplicationIdentity(
+    EasyBarApplicationIdentity(
       displayName: "EasyBar Native",
       processName: "easybar-native",
       loggerLabel: "easybar-native",
@@ -15,10 +13,14 @@ enum EasyBarNativeAppMain {
       defaultConfigRelativePath: ".config/easybar-native/config.toml",
       defaultRuntimeRelativePath: ".local/state/easybar-native/runtime",
       defaultEnvironment: [
-        SharedEnvironmentKeys.calendarAgentSocketPath:
-          SharedPathDefaults.calendarAgentSocketPath(in: sharedAgentRuntimeDirectory),
-        SharedEnvironmentKeys.networkAgentSocketPath:
-          SharedPathDefaults.networkAgentSocketPath(in: sharedAgentRuntimeDirectory),
+        SharedEnvironmentKeys.widgetsDirectory:
+          SharedPathDefaults.homeRelativePath(".config/easybar-native/widgets").path,
+        SharedEnvironmentKeys.widgetPackagesDirectory:
+          SharedPathDefaults.homeRelativePath(".local/share/easybar-native/packages").path,
+        SharedEnvironmentKeys.loggingDirectory:
+          SharedPathDefaults.homeRelativePath(".local/state/easybar-native").path,
+        SharedEnvironmentKeys.widgetEditorStubPath:
+          SharedPathDefaults.homeRelativePath(".local/share/easybar-native/easybar_api.lua").path,
       ],
       builtInSurfacePolicy: .inboxOnly
     )

@@ -5,9 +5,8 @@ import XCTest
 @testable import EasyBarNativeApp
 
 final class ApplicationIdentityTests: XCTestCase {
-  func testNativeIdentityOwnsRuntimeAndUsesSharedAgentSockets() {
+  func testNativeIdentityOwnsRuntimeAndUserData() {
     let identity = EasyBarNativeAppMain.identity
-    let sharedRuntimeDirectory = SharedPathDefaults.defaultRuntimeDirectory().path
 
     XCTAssertEqual(identity.displayName, "EasyBar Native")
     XCTAssertEqual(identity.processName, "easybar-native")
@@ -16,13 +15,25 @@ final class ApplicationIdentityTests: XCTestCase {
     XCTAssertEqual(identity.defaultConfigRelativePath, ".config/easybar-native/config.toml")
     XCTAssertEqual(identity.defaultRuntimeRelativePath, ".local/state/easybar-native/runtime")
     XCTAssertEqual(identity.builtInSurfacePolicy, .inboxOnly)
+
     XCTAssertEqual(
-      identity.defaultEnvironment[SharedEnvironmentKeys.calendarAgentSocketPath],
-      SharedPathDefaults.calendarAgentSocketPath(in: sharedRuntimeDirectory)
+      identity.defaultEnvironment[SharedEnvironmentKeys.widgetsDirectory],
+      SharedPathDefaults.homeRelativePath(".config/easybar-native/widgets").path
     )
     XCTAssertEqual(
-      identity.defaultEnvironment[SharedEnvironmentKeys.networkAgentSocketPath],
-      SharedPathDefaults.networkAgentSocketPath(in: sharedRuntimeDirectory)
+      identity.defaultEnvironment[SharedEnvironmentKeys.widgetPackagesDirectory],
+      SharedPathDefaults.homeRelativePath(".local/share/easybar-native/packages").path
     )
+    XCTAssertEqual(
+      identity.defaultEnvironment[SharedEnvironmentKeys.loggingDirectory],
+      SharedPathDefaults.homeRelativePath(".local/state/easybar-native").path
+    )
+    XCTAssertEqual(
+      identity.defaultEnvironment[SharedEnvironmentKeys.widgetEditorStubPath],
+      SharedPathDefaults.homeRelativePath(".local/share/easybar-native/easybar_api.lua").path
+    )
+
+    XCTAssertNil(identity.defaultEnvironment[SharedEnvironmentKeys.calendarAgentSocketPath])
+    XCTAssertNil(identity.defaultEnvironment[SharedEnvironmentKeys.networkAgentSocketPath])
   }
 }

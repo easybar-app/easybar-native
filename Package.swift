@@ -2,13 +2,18 @@
 
 import PackageDescription
 
+let strictConcurrencySettings: [SwiftSetting] = [
+  .enableUpcomingFeature("StrictConcurrency")
+]
+
 let package = Package(
   name: "EasyBarNative",
   platforms: [
     .macOS(.v14)
   ],
   products: [
-    .executable(name: "EasyBarNative", targets: ["EasyBarNativeApp"])
+    .executable(name: "EasyBarNative", targets: ["EasyBarNativeApp"]),
+    .executable(name: "EasyBarNativeCtl", targets: ["EasyBarNativeCtl"]),
   ],
   dependencies: [
     .package(
@@ -27,9 +32,15 @@ let package = Package(
       exclude: [
         "Info.plist"
       ],
-      swiftSettings: [
-        .enableUpcomingFeature("StrictConcurrency")
-      ]
+      swiftSettings: strictConcurrencySettings
+    ),
+    .executableTarget(
+      name: "EasyBarNativeCtl",
+      dependencies: [
+        .product(name: "EasyBarShared", package: "easybar-kit")
+      ],
+      path: "Sources/EasyBarNativeCtl",
+      swiftSettings: strictConcurrencySettings
     ),
     .testTarget(
       name: "EasyBarNativeAppTests",
@@ -39,9 +50,7 @@ let package = Package(
         .product(name: "EasyBarShared", package: "easybar-kit"),
       ],
       path: "Tests/EasyBarNativeAppTests",
-      swiftSettings: [
-        .enableUpcomingFeature("StrictConcurrency")
-      ]
+      swiftSettings: strictConcurrencySettings
     ),
   ]
 )

@@ -39,21 +39,18 @@ if [ ! -f "$package_zip" ]; then
   exit 1
 fi
 
-expected_entry="EasyBarNative.app/Contents/MacOS/EasyBarNative"
-if ! unzip -Z1 "$package_zip" | grep -Fxq "$expected_entry"; then
-  echo "Release archive does not contain expected app executable: $expected_entry" >&2
-  unzip -Z1 "$package_zip" >&2
-  exit 1
-fi
-
-if unzip -Z1 "$package_zip" | grep -Fq '/EasyBarCalendarAgent.app/'; then
-  echo "EasyBar Native release archive must not duplicate the shared calendar agent." >&2
-  exit 1
-fi
-if unzip -Z1 "$package_zip" | grep -Fq '/EasyBarNetworkAgent.app/'; then
-  echo "EasyBar Native release archive must not duplicate the shared network agent." >&2
-  exit 1
-fi
+for expected_entry in \
+  "EasyBarNative.app/Contents/MacOS/EasyBarNative" \
+  "EasyBarNative.app/Contents/MacOS/EasyBarLuaRuntime" \
+  "EasyBarNative.app/Contents/Resources/EasyBarNative/CLI/EasyBarCtl" \
+  "EasyBarNative.app/Contents/MacOS/easybar-native"
+do
+  if ! unzip -Z1 "$package_zip" | grep -Fxq "$expected_entry"; then
+    echo "Release archive does not contain expected executable: $expected_entry" >&2
+    unzip -Z1 "$package_zip" >&2
+    exit 1
+  fi
+done
 
 echo "Release package:"
 ls -lh "$package_zip"

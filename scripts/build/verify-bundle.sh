@@ -53,10 +53,6 @@ arm64 | x86_64 | universal) ;;
 esac
 
 app_name="EasyBarNative"
-calendar_agent_name="EasyBarCalendarAgent"
-network_agent_name="EasyBarNetworkAgent"
-cli_exec="easybar"
-
 app_bundle="$dist_dir/${app_name}.app"
 app_contents="$app_bundle/Contents"
 app_macos="$app_contents/MacOS"
@@ -65,29 +61,11 @@ app_resource_dir="$app_resources/EasyBar"
 app_themes_dir="$app_resources/Themes"
 app_bin="$app_macos/$app_name"
 lua_runtime_bin="$app_macos/EasyBarLuaRuntime"
+cli_core_bin="$app_resources/EasyBarNative/CLI/EasyBarCtl"
+cli_bin="$app_macos/easybar-native"
 plist="$app_contents/Info.plist"
 app_icon_file="$app_name"
 app_icon_icns="$app_resources/${app_icon_file}.icns"
-
-calendar_agent_bundle="$dist_dir/${calendar_agent_name}.app"
-calendar_agent_contents="$calendar_agent_bundle/Contents"
-calendar_agent_macos="$calendar_agent_contents/MacOS"
-calendar_agent_resources="$calendar_agent_contents/Resources"
-calendar_agent_bin="$calendar_agent_macos/$calendar_agent_name"
-calendar_plist="$calendar_agent_contents/Info.plist"
-calendar_icon_file="$calendar_agent_name"
-calendar_icon_icns="$calendar_agent_resources/${calendar_icon_file}.icns"
-
-network_agent_bundle="$dist_dir/${network_agent_name}.app"
-network_agent_contents="$network_agent_bundle/Contents"
-network_agent_macos="$network_agent_contents/MacOS"
-network_agent_resources="$network_agent_contents/Resources"
-network_agent_bin="$network_agent_macos/$network_agent_name"
-network_plist="$network_agent_contents/Info.plist"
-network_icon_file="$network_agent_name"
-network_icon_icns="$network_agent_resources/${network_icon_file}.icns"
-
-cli_bin="$dist_dir/$cli_exec"
 
 require_file() {
   local path="$1"
@@ -142,22 +120,23 @@ verify_architecture() {
   esac
 }
 
+require_file "$app_bin" "EasyBarNative executable"
+require_file "$lua_runtime_bin" "EasyBarLuaRuntime executable"
+require_file "$cli_core_bin" "EasyBarCtl executable"
+require_file "$cli_bin" "easybar-native executable"
+
 echo "Built $arch artifacts:"
 file "$app_bin"
 file "$lua_runtime_bin"
-file "$calendar_agent_bin"
-file "$network_agent_bin"
+file "$cli_core_bin"
 file "$cli_bin"
 
 verify_architecture "$app_bin" "EasyBarNative"
 verify_architecture "$lua_runtime_bin" "EasyBarLuaRuntime"
-verify_architecture "$calendar_agent_bin" "EasyBarCalendarAgent"
-verify_architecture "$network_agent_bin" "EasyBarNetworkAgent"
-verify_architecture "$cli_bin" "easybar CLI"
+verify_architecture "$cli_core_bin" "EasyBarCtl"
+verify_architecture "$cli_bin" "easybar-native"
 
 require_file "$plist" "EasyBar Native Info.plist"
-require_file "$calendar_plist" "calendar agent Info.plist"
-require_file "$network_plist" "network agent Info.plist"
 require_dir "$app_resource_dir" "app resource directory"
 require_file "$app_resource_dir/Assets/easybar-menubar.svg" "menu bar icon resource"
 require_file "$app_resource_dir/Lua/runtime.lua" "Lua runtime resource"
@@ -167,38 +146,31 @@ require_file "$app_resource_dir/Events/event_catalog.json" "event catalog"
 require_file "$app_resource_dir/ThemeTokens/theme_tokens.json" "theme token catalog"
 require_dir "$app_themes_dir" "themes directory"
 require_file "$app_icon_icns" "EasyBar Native icon"
-require_file "$calendar_icon_icns" "calendar agent icon"
-require_file "$network_icon_icns" "network agent icon"
+
 if [ -e "$app_contents/Library/LoginItems" ]; then
   echo "Unexpected nested helper app directory: $app_contents/Library/LoginItems" >&2
   exit 1
 fi
 
-test "$('/usr/libexec/PlistBuddy' -c 'Print :CFBundleIconFile' "$plist")" = "$app_icon_file"
-test "$('/usr/libexec/PlistBuddy' -c 'Print :CFBundleIconFile' "$calendar_plist")" = "$calendar_icon_file"
-test "$('/usr/libexec/PlistBuddy' -c 'Print :CFBundleIconFile' "$network_plist")" = "$network_icon_file"
-test "$('/usr/libexec/PlistBuddy' -c 'Print :CFBundleShortVersionString' "$plist")" = "$version"
-test "$('/usr/libexec/PlistBuddy' -c 'Print :CFBundleVersion' "$plist")" = "$version"
-test "$('/usr/libexec/PlistBuddy' -c 'Print :CFBundleShortVersionString' "$calendar_plist")" = "$version"
-test "$('/usr/libexec/PlistBuddy' -c 'Print :CFBundleVersion' "$calendar_plist")" = "$version"
-test "$('/usr/libexec/PlistBuddy' -c 'Print :CFBundleShortVersionString' "$network_plist")" = "$version"
-test "$('/usr/libexec/PlistBuddy' -c 'Print :CFBundleVersion' "$network_plist")" = "$version"
+test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleIconFile' "$plist")" = "$app_icon_file"
+test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' "$plist")" = "$version"
+test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleVersion' "$plist")" = "$version"
 
 app_version_output="$("$app_bin" --version)"
 cli_version_output="$("$cli_bin" --version)"
+core_cli_version_output="$("$cli_core_bin" --version)"
 test "$app_version_output" = "EasyBar Native $version"
-test "$cli_version_output" = "easybar $version"
+test "$cli_version_output" = "easybar-native $version"
+test "$core_cli_version_output" = "easybar $version"
 echo "Verified binary versions: $app_version_output; $cli_version_output"
+
+codesign --verify --deep --strict "$app_bundle"
 
 echo "Info.plist:"
 plutil -p "$plist"
-echo "Calendar agent Info.plist:"
-plutil -p "$calendar_plist"
-echo "Network agent Info.plist:"
-plutil -p "$network_plist"
-echo "Packaged app root:"
-ls -1 "$app_bundle"
 echo "Packaged Contents:"
 ls -1 "$app_contents"
+echo "Packaged executables:"
+ls -1 "$app_macos"
 echo "Packaged Resources:"
 ls -1 "$app_resources" 2>/dev/null || true

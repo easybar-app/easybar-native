@@ -33,21 +33,32 @@ assert_contains() {
   fi
 }
 
+assert_not_contains() {
+  local file="$1"
+  local unexpected="$2"
+  if grep -Fq "$unexpected" "$file"; then
+    echo "Expected ${file} not to contain: ${unexpected}" >&2
+    cat "$file" >&2
+    exit 1
+  fi
+}
+
 cask="${tap_dir}/Casks/easybar-native.rb"
 test -s "$cask"
 assert_contains "$cask" 'cask "easybar-native" do'
 assert_contains "$cask" "url \"https://github.com/easybar-app/easybar-native/releases/download/${tag}/EasyBarNative-${version}.zip\""
 assert_contains "$cask" "sha256 \"${sha}\""
 assert_contains "$cask" "version \"${version}\""
-assert_contains "$cask" '"easybar-calendar-agent",'
-assert_contains "$cask" '"easybar-network-agent",'
+assert_contains "$cask" 'depends_on formula: "lua"'
 assert_contains "$cask" 'depends_on macos: :sonoma'
 assert_contains "$cask" 'system "xattr", "-dr", "com.apple.quarantine", "#{appdir}/EasyBarNative.app"'
-assert_contains "$cask" '"services", "restart", "easybar-calendar-agent"'
-assert_contains "$cask" '"services", "restart", "easybar-network-agent"'
 assert_contains "$cask" 'app "EasyBarNative.app"'
+assert_contains "$cask" 'binary "#{appdir}/EasyBarNative.app/Contents/MacOS/easybar-native", target: "easybar-native"'
 assert_contains "$cask" '"~/.config/easybar-native",'
+assert_contains "$cask" '"~/.local/share/easybar-native",'
 assert_contains "$cask" '"~/.local/state/easybar-native",'
+assert_not_contains "$cask" 'easybar-calendar-agent'
+assert_not_contains "$cask" 'easybar-network-agent'
 
 test -e "${tap_dir}/Casks/easybar.rb"
 ruby -c "$cask" >/dev/null
