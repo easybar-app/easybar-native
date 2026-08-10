@@ -11,10 +11,9 @@ let package = Package(
     .executable(name: "EasyBarNative", targets: ["EasyBarNativeApp"])
   ],
   dependencies: [
-    // .package(path: "../easybar-kit")
     .package(
       url: "https://github.com/easybar-app/easybar-kit",
-      from: "0.53.2",
+      from: "0.53.2"
     )
   ],
   targets: [
@@ -25,6 +24,9 @@ let package = Package(
         .product(name: "EasyBarShared", package: "easybar-kit"),
       ],
       path: "Sources/EasyBarNativeApp",
+      exclude: [
+        "Info.plist"
+      ],
       swiftSettings: [
         .enableUpcomingFeature("StrictConcurrency")
       ]
