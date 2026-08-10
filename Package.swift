@@ -13,7 +13,7 @@ let package = Package(
   dependencies: [
     .package(
       url: "https://github.com/easybar-app/easybar-kit",
-      from: "0.1.0"
+      from: "0.8.0"
     )
   ],
   targets: [
