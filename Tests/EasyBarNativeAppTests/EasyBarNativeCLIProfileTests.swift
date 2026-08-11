@@ -48,4 +48,39 @@ final class EasyBarNativeCLIProfileTests: XCTestCase {
       "/Applications/EasyBarNative.app/Contents/Resources/EasyBarNative/CLI/EasyBarCtl"
     )
   }
+
+  func testBareLauncherCommandResolvesThroughPATHBeforeLocatingCoreCLI() throws {
+    let fileManager = FileManager.default
+    let temporaryDirectory = fileManager.temporaryDirectory
+      .appendingPathComponent("easybar-native-cli-profile-\(UUID().uuidString)", isDirectory: true)
+    defer { try? fileManager.removeItem(at: temporaryDirectory) }
+
+    let launcher =
+      temporaryDirectory
+      .appendingPathComponent("EasyBarNative.app/Contents/MacOS/easybar-native")
+    let binDirectory = temporaryDirectory.appendingPathComponent("bin", isDirectory: true)
+    let linkedLauncher = binDirectory.appendingPathComponent("easybar-native")
+    try fileManager.createDirectory(
+      at: launcher.deletingLastPathComponent(),
+      withIntermediateDirectories: true
+    )
+    try fileManager.createDirectory(at: binDirectory, withIntermediateDirectories: true)
+    XCTAssertTrue(fileManager.createFile(atPath: launcher.path, contents: Data()))
+    try fileManager.setAttributes([.posixPermissions: 0o755], ofItemAtPath: launcher.path)
+    try fileManager.createSymbolicLink(at: linkedLauncher, withDestinationURL: launcher)
+
+    let resolvedLauncher = EasyBarNativeCLIProfile.launcherURL(
+      argumentZero: "easybar-native",
+      environment: ["PATH": binDirectory.path],
+      currentDirectoryURL: temporaryDirectory.appendingPathComponent("unrelated", isDirectory: true)
+    )
+
+    XCTAssertEqual(resolvedLauncher.resolvingSymlinksInPath().path, launcher.path)
+    XCTAssertEqual(
+      EasyBarNativeCLIProfile.coreCLIURL(for: resolvedLauncher).path,
+      temporaryDirectory
+        .appendingPathComponent("EasyBarNative.app/Contents/Resources/EasyBarNative/CLI/EasyBarCtl")
+        .path
+    )
+  }
 }

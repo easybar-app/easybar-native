@@ -6,8 +6,13 @@ import Foundation
 enum EasyBarNativeCtlMain {
   /// Applies the Native profile and forwards the command to the bundled shared CLI core.
   static func main() {
+    let environment = ProcessInfo.processInfo.environment
+    let launcherURL = EasyBarNativeCLIProfile.launcherURL(
+      argumentZero: CommandLine.arguments[0],
+      environment: environment
+    )
     let coreCLI = EasyBarNativeCLIProfile.coreCLIURL(
-      for: URL(fileURLWithPath: CommandLine.arguments[0])
+      for: launcherURL
     )
 
     guard FileManager.default.isExecutableFile(atPath: coreCLI.path) else {
@@ -15,14 +20,12 @@ enum EasyBarNativeCtlMain {
       exit(1)
     }
 
-    let environment = EasyBarNativeCLIProfile.environment(
-      inheriting: ProcessInfo.processInfo.environment
-    )
+    let childEnvironment = EasyBarNativeCLIProfile.environment(inheriting: environment)
 
     let process = Process()
     process.executableURL = coreCLI
     process.arguments = Array(CommandLine.arguments.dropFirst())
-    process.environment = environment
+    process.environment = childEnvironment
     process.standardInput = FileHandle.standardInput
     process.standardOutput = FileHandle.standardOutput
     process.standardError = FileHandle.standardError

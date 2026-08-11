@@ -12,6 +12,43 @@ enum EasyBarNativeCLIProfile {
     SharedEnvironmentKeys.widgetEditorStubPath: ".local/share/easybar-native/easybar_api.lua",
   ]
 
+  /// Resolves the launcher path exactly as the invoking shell did, including a bare PATH command.
+  static func launcherURL(
+    argumentZero: String,
+    environment: [String: String],
+    currentDirectoryURL: URL = URL(
+      fileURLWithPath: FileManager.default.currentDirectoryPath,
+      isDirectory: true
+    ),
+    fileManager: FileManager = .default
+  ) -> URL {
+    let suppliedURL = URL(
+      fileURLWithPath: argumentZero,
+      relativeTo: currentDirectoryURL
+    ).standardizedFileURL
+    guard !argumentZero.contains("/") else { return suppliedURL }
+
+    for pathEntry in environment["PATH", default: ""].split(
+      separator: ":",
+      omittingEmptySubsequences: false
+    ) {
+      let directoryURL =
+        pathEntry.isEmpty
+        ? currentDirectoryURL
+        : URL(
+          fileURLWithPath: String(pathEntry),
+          isDirectory: true,
+          relativeTo: currentDirectoryURL
+        ).standardizedFileURL
+      let candidate = directoryURL.appendingPathComponent(argumentZero, isDirectory: false)
+      if fileManager.isExecutableFile(atPath: candidate.path) {
+        return candidate
+      }
+    }
+
+    return suppliedURL
+  }
+
   /// Locates the private shared CLI core relative to the installed launcher, resolving symlinks.
   static func coreCLIURL(for executableURL: URL) -> URL {
     executableURL.resolvingSymlinksInPath()
