@@ -28,7 +28,7 @@ NEXT_MAJOR := $(shell python3 -c 'm,n,p=map(int,"$(CURRENT_CORE_VERSION)".split(
 
 .PHONY: help build test check check-concurrency check-release-scripts run support \
         bundle package release verify verify-release print-package-sha256 \
-        bundle-local install-local uninstall-local stop restart-app print-local-version \
+        bundle-local update install-local uninstall-local stop restart-app print-local-version \
         fmt fmt-swift fmt-md fmt-yaml fmt-json lint lint-swift \
         clean clean-dist \
         tag-patch tag-minor tag-major push-tags tag
@@ -81,6 +81,9 @@ print-package-sha256: package ## Print the SHA-256 hash for the release ZIP.
 	@shasum -a 256 "$(PACKAGE_ZIP)"
 
 ##@ Development
+
+update: ## Update Swift package dependencies.
+	@$(SWIFT) package update
 
 support: ## Build and expose EasyBarKit's Lua runtime helper for direct source-tree runs.
 	@test -f "$(EASYBAR_KIT_ROOT)/Package.swift" || { echo "EasyBarKit checkout not found: $(EASYBAR_KIT_ROOT)" >&2; exit 1; }
