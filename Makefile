@@ -47,7 +47,8 @@ test: ## Run EasyBar Native frontend unit tests.
 check-concurrency: ## Build with complete strict concurrency checking.
 	@$(SWIFT) build -Xswiftc -strict-concurrency=complete
 
-check-release-scripts: ## Test Homebrew native-cask generation.
+check-release-scripts: ## Test release archive checks and Homebrew native-cask generation.
+	@scripts/release/test-archive-utils.sh
 	@scripts/release/test-homebrew-cask-update.sh
 
 check: test check-concurrency lint check-release-scripts ## Run the complete repository verification suite.

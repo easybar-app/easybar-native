@@ -2,6 +2,9 @@
 set -Eeuo pipefail
 trap 'echo "release verification failed at line $LINENO: $BASH_COMMAND" >&2' ERR
 
+script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
+source "$script_dir/archive-utils.sh"
+
 version="${VERSION:-dev}"
 arch="${ARCH:-universal}"
 dist_dir="${DIST_DIR:-dist}"
@@ -45,7 +48,7 @@ for expected_entry in \
   "EasyBarNative.app/Contents/Resources/EasyBarNative/CLI/EasyBarCtl" \
   "EasyBarNative.app/Contents/MacOS/easybar-native"
 do
-  if ! unzip -Z1 "$package_zip" | grep -Fxq "$expected_entry"; then
+  if ! archive_contains_exact_entry "$package_zip" "$expected_entry"; then
     echo "Release archive does not contain expected executable: $expected_entry" >&2
     unzip -Z1 "$package_zip" >&2
     exit 1
