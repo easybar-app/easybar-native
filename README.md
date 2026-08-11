@@ -1,7 +1,5 @@
 # EasyBar Native
 
-![EasyBar Native screenshot](https://easybar.dev/assets/native_widgets.png)
-
 EasyBar Native is a lightweight, scriptable macOS menu-bar app for Lua widgets. It keeps the normal
 macOS menu bar while giving every widget its own menu-bar item.
 
