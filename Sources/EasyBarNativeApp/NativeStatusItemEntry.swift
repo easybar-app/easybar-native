@@ -6,6 +6,7 @@ final class NativeStatusItemEntry {
   let statusItem: NSStatusItem
   let hostingView: NSHostingView<AnyView>
 
+  /// Couples one system status item with the SwiftUI view hosted inside its button.
   init(statusItem: NSStatusItem, hostingView: NSHostingView<AnyView>) {
     self.statusItem = statusItem
     self.hostingView = hostingView

@@ -14,11 +14,13 @@ final class NativeStatusItemController: EasyBarSurfaceController {
   private var widgetSubscription: AnyCancellable?
   private var isVisible = false
 
+  /// Creates a status-item host for one shared EasyBar presentation context.
   init(context: EasyBarSurfaceContext) {
     self.context = context
     self.presentationModel = context.presentationModel
   }
 
+  /// Starts observing widgets and makes all current status items visible.
   func present() {
     isVisible = true
     installSubscriptionIfNeeded()
@@ -26,21 +28,25 @@ final class NativeStatusItemController: EasyBarSurfaceController {
     setEntriesVisible(true)
   }
 
+  /// Hides every status item without discarding its current rendered state.
   func hide() {
     isVisible = false
     setEntriesVisible(false)
   }
 
+  /// Recreates status items so AppKit reevaluates their relative allocation order.
   func reloadLayout() {
     reconcile(presentationModel.widgets, forceReorder: true)
   }
 
+  /// Cancels widget observation and removes every owned status item.
   func stop() {
     widgetSubscription?.cancel()
     widgetSubscription = nil
     removeAllStatusItems()
   }
 
+  /// Subscribes once to shared top-level widget snapshots.
   private func installSubscriptionIfNeeded() {
     guard widgetSubscription == nil else { return }
 
@@ -79,6 +85,7 @@ final class NativeStatusItemController: EasyBarSurfaceController {
     }
   }
 
+  /// Creates and configures the AppKit status item for one rendered widget surface.
   private func makeEntry(for widget: EasyBarPresentationModel.WidgetSurface)
     -> NativeStatusItemEntry
   {
@@ -111,6 +118,7 @@ final class NativeStatusItemController: EasyBarSurfaceController {
     return entry
   }
 
+  /// Replaces one hosted view and sizes its status item to the resulting intrinsic width.
   private func update(
     entry: NativeStatusItemEntry,
     with widget: EasyBarPresentationModel.WidgetSurface
@@ -126,12 +134,14 @@ final class NativeStatusItemController: EasyBarSurfaceController {
     entry.statusItem.isVisible = isVisible
   }
 
+  /// Applies frontend visibility to all currently allocated status items.
   private func setEntriesVisible(_ visible: Bool) {
     for entry in entries.values {
       entry.statusItem.isVisible = visible
     }
   }
 
+  /// Removes all owned status items from the system status bar and clears ordering state.
   private func removeAllStatusItems() {
     for entry in entries.values {
       NSStatusBar.system.removeStatusItem(entry.statusItem)

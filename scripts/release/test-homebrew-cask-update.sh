@@ -14,7 +14,8 @@ mkdir -p "${tap_dir}/Casks"
 git -C "${tap_dir}" init -q
 touch "${tap_dir}/Casks/easybar.rb"
 git -C "${tap_dir}" add Casks
-git -C "${tap_dir}" -c user.name=test -c user.email=test@example.com commit -qm fixture
+git -C "${tap_dir}" -c user.name=test -c user.email=test@example.com \
+  -c commit.gpgsign=false commit -qm fixture
 
 "${repo_root}/scripts/release/update-homebrew-cask.sh" \
   --tap-dir "${tap_dir}" \

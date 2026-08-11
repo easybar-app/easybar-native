@@ -46,6 +46,7 @@ let package = Package(
       name: "EasyBarNativeAppTests",
       dependencies: [
         "EasyBarNativeApp",
+        "EasyBarNativeCtl",
         .product(name: "EasyBarKit", package: "easybar-kit"),
         .product(name: "EasyBarShared", package: "easybar-kit"),
       ],

@@ -2,6 +2,7 @@ import EasyBarShared
 
 /// Maps logical EasyBar regions into the native status-area ordering model.
 enum NativeWidgetOrdering {
+  /// Returns the stable ordering rank for one logical EasyBar region.
   static func rank(for position: WidgetPosition) -> Int {
     switch position {
     case .left: 0
@@ -10,6 +11,7 @@ enum NativeWidgetOrdering {
     }
   }
 
+  /// Orders surfaces by logical region, explicit order, and identifier.
   static func precedes(
     lhsPosition: WidgetPosition,
     lhsOrder: Int,

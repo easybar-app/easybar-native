@@ -26,6 +26,7 @@ enum EasyBarNativeAppMain {
     )
   }
 
+  /// Starts the isolated Native runtime with the status-item surface controller.
   @MainActor
   static func main() {
     EasyBarApplication.run(identity: identity) { context in
