@@ -1,157 +1,49 @@
 # EasyBar Native
 
-EasyBar Native is the native macOS menu-bar frontend for
-[`easybar-kit`](../easybar-kit). It runs EasyBar Lua widgets as independent `NSStatusItem`s in the
-system menu bar instead of rendering them inside EasyBar's custom full-width bar.
+![EasyBar Native screenshot](https://easybar.dev/assets/native_widgets.png)
 
-Lua packages are the only public/custom widget extension model. EasyBar Native keeps the host-owned
-Inbox surface because Lua packages such as `inbox-github`, `inbox-gitlab`, and `inbox-brew` publish
-into it. Regular EasyBar built-ins are not registered as Native status items.
+EasyBar Native is a lightweight, scriptable macOS menu-bar app for Lua widgets. It keeps the normal
+macOS menu bar while giving every widget its own menu-bar item.
 
-## Isolation from EasyBar
+## Features
 
-EasyBar Native intentionally owns its runtime and user data instead of sharing EasyBar's installation
-state:
+- Scriptable Lua widgets with events, popups, groups, and context menus
+- Installable Lua widgets and libraries from the official package registry
+- A built-in Inbox for notifications published by Lua widgets
+- Independent configuration, packages, logs, and runtime state
+- Shared EasyBar themes and Lua widget APIs
+- A dedicated `easybar-native` CLI for control and diagnostics
+- No dependency on EasyBar's calendar or network helper agents
 
-```text
-config:       ~/.config/easybar-native/config.toml
-widgets:      ~/.config/easybar-native/widgets
-runtime:      ~/.local/state/easybar-native/runtime
-logs:         ~/.local/state/easybar-native/easybar-native.out
-packages:     ~/.local/share/easybar-native/packages
-editor stub:  ~/.local/share/easybar-native/easybar_api.lua
-CLI:          easybar-native
-```
+EasyBar Native intentionally provides Lua widgets and the built-in Inbox only. Use
+[EasyBar](https://easybar.dev/products/easybar/) when you want the full-width bar and its native
+Spaces, battery, Wi-Fi, calendar, volume, CPU, and other built-ins.
 
-The Native app does not install, start, stop, or depend on EasyBar's calendar or network helper
-agents. It also does not install or modify the `easybar` CLI or EasyBar's managed package store.
+## Requirements
 
-The bundled `easybar-native` command uses the same tested package-management and IPC implementation
-from EasyBarKit, but runs it with Native's isolated config, runtime, log, widget, and package paths.
-Helper-agent commands are not exposed through the Native CLI.
+- macOS 14 Sonoma or newer
+- [Homebrew](https://brew.sh/) for installation
 
-Examples:
+## Installation
 
 ```bash
-easybar-native widgets search
-easybar-native widgets install tailscale
-easybar-native widgets installed
-easybar-native config reload
-easybar-native logs
+brew tap easybar-app/tap
+brew install --cask easybar-app/tap/easybar-native
+open -a "EasyBar Native"
 ```
 
-## What is shared
+See the [installation guide](https://easybar.dev/products/easybar-native/installation/) for upgrades,
+verification, and removal.
 
-The frontend still reuses EasyBarKit's implementation for:
+## Documentation
 
-- Lua widget loading and package activation
-- timers, commands, JSON, storage, events, and lifecycle events
-- hover, click, scroll, and context-menu interaction
-- SwiftUI widget rendering
-- custom popup panels
-- the host-owned Inbox aggregation surface
-- themes and widget state
-- the shared CLI implementation embedded behind `easybar-native`
+- [Quick start](https://easybar.dev/products/easybar-native/quick-start/)
+- [Configuration](https://easybar.dev/products/easybar-native/configuration/)
+- [Lua widgets and packages](https://easybar.dev/products/easybar-native/widgets/)
+- [`easybar-native` CLI](https://easybar.dev/cli/easybar-native/)
+- [Troubleshooting](https://easybar.dev/products/easybar-native/troubleshooting/)
+- [Compare EasyBar products](https://easybar.dev/products/)
 
-Sharing implementation does not imply sharing user data or background services.
+## License
 
-## Native differences
-
-macOS owns the status area, so EasyBar's `left`, `center`, and `right` positions are treated as
-relative ordering hints only. EasyBar Native cannot place arbitrary status items on the left side of
-the macOS menu bar or span a background across multiple status items.
-
-## Build and test
-
-Keep this repository next to `easybar-kit` for source-tree development:
-
-```text
-projects/
-├── easybar-kit/
-└── easybar-native/
-```
-
-Then:
-
-```bash
-make build
-make test
-make check
-make run
-```
-
-`make check` also validates the Homebrew cask generator used by tagged releases.
-
-## Install the current checkout
-
-Install a local development build with:
-
-```bash
-make install-local
-```
-
-The installation contains:
-
-```text
-~/Applications/EasyBarNative.app
-~/.local/bin/easybar-native -> ~/Applications/EasyBarNative.app/Contents/MacOS/easybar-native
-```
-
-No EasyBar helper agents or shared CLI binaries are installed.
-
-The local build receives a Git-derived version containing both the EasyBar Native and EasyBarKit
-commits, for example:
-
-```text
-0.2.0-dev.a1b2c3d4.kit.e5f6a7b8
-```
-
-If either checkout has staged, unstaged, or untracked changes, the version ends in `-dirty`.
-Inspect it before installing with:
-
-```bash
-make print-local-version
-```
-
-Local bundles are ad-hoc signed and are not notarized. The installer recursively removes
-`com.apple.quarantine` from `EasyBarNative.app` before launching it.
-
-Override the defaults when needed:
-
-```bash
-make install-local LOCAL_INSTALL_ARCH=universal
-make install-local LOCAL_APP_DIR=/Applications
-make install-local EASYBAR_KIT_ROOT=/path/to/easybar-kit
-```
-
-Remove the local app and CLI link with:
-
-```bash
-make uninstall-local
-```
-
-Native config, logs, and package data are preserved by `uninstall-local`.
-
-## Release packaging
-
-Build the same native release archive produced by GitHub Actions with:
-
-```bash
-make release ARCH=universal VERSION=0.2.1
-```
-
-The release artifact is:
-
-```text
-dist/EasyBarNative-0.2.1.zip
-```
-
-The ZIP contains `EasyBarNative.app`, including the Lua runtime helper, the private EasyBarKit CLI
-core, and the public `easybar-native` launcher.
-
-A pushed `v*` tag runs the release workflow on macOS, verifies the repository, builds and uploads the
-archive to the GitHub release, and then dispatches `update-homebrew-cask.yml`. The generated cask
-depends only on Lua, installs the app, and exposes the embedded `easybar-native` launcher as a binary.
-
-Because the published app is currently ad-hoc signed rather than notarized, the generated cask
-removes `com.apple.quarantine` from the installed app before it is used.
+Licensed under the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0).
