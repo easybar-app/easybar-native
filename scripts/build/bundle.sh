@@ -351,7 +351,7 @@ echo "Generating bundle icon"
   rsvg-convert \
   magick \
   "$dist_dir" \
-  "$kit_root/packaging/easybar-icon.svg:$app_icon_icns"
+  "$project_root/packaging/easybar-native-icon.svg:$app_icon_icns"
 
 echo "Ad-hoc signing app executables"
 for executable in "$lua_runtime_bin" "$cli_core_bin" "$cli_bin"; do
