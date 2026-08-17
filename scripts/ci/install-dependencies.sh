@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
+# Install development and CI dependencies.
 set -euo pipefail
 
+# Print supported command-line arguments.
 usage() {
   echo "Usage: $0 <release>" >&2
 }
@@ -23,6 +25,7 @@ if ! command -v brew >/dev/null 2>&1; then
   exit 1
 fi
 
+# Install a command only when it is unavailable.
 install_if_missing() {
   local command_name="$1"
   local formula="$2"

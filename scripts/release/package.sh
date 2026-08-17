@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# Create deterministic release packages.
 set -Eeuo pipefail
 trap 'echo "package failed at line $LINENO: $BASH_COMMAND" >&2' ERR
 

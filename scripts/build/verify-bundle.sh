@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
+# Verify the structure and metadata of an application bundle.
 set -euo pipefail
 
+# Print supported command-line arguments.
 usage() {
   echo "Usage: scripts/build/verify-bundle.sh [--arch <arm64|x86_64|universal>] [--version <version>] [--dist-dir <dir>]" >&2
 }
@@ -67,6 +69,7 @@ plist="$app_contents/Info.plist"
 app_icon_file="$app_name"
 app_icon_icns="$app_resources/${app_icon_file}.icns"
 
+# Exit unless a required file exists.
 require_file() {
   local path="$1"
   local label="$2"
@@ -77,6 +80,7 @@ require_file() {
   fi
 }
 
+# Exit unless a required directory exists.
 require_dir() {
   local path="$1"
   local label="$2"
@@ -87,6 +91,7 @@ require_dir() {
   fi
 }
 
+# Verify that a binary contains the requested architecture.
 verify_architecture() {
   local path="$1"
   local label="$2"

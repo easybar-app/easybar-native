@@ -1,10 +1,13 @@
 #!/usr/bin/env bash
+# Derive normalized values for a release workflow.
 set -euo pipefail
 
+# Print supported command-line arguments.
 usage() {
   echo "Usage: $0 --tag <tag> [--version <version>] [--repository <owner/repo>]" >&2
 }
 
+# Write a value to the workflow output file.
 write_output() {
   local name="$1"
   local value="$2"

@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# Commit the updated Homebrew cask definition.
 set -euo pipefail
 
 tap_dir=""

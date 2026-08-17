@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# Verify release archives and metadata.
 set -Eeuo pipefail
 trap 'echo "release verification failed at line $LINENO: $BASH_COMMAND" >&2' ERR
 

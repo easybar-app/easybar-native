@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# Build the distributable application bundle.
 set -Eeuo pipefail
 trap 'echo "bundle failed at line $LINENO: $BASH_COMMAND" >&2' ERR
 

@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
+# Remove a local development installation.
 set -Eeuo pipefail
 
+# Print supported command-line arguments.
 usage() {
   cat >&2 <<'EOF_USAGE'
 Usage: scripts/dev/uninstall-local.sh [options]
@@ -47,6 +49,7 @@ if [ "$(uname -s)" != "Darwin" ]; then
   exit 1
 fi
 
+# Exit unless a required command is available.
 require_command() {
   local command_name="$1"
 
@@ -56,6 +59,7 @@ require_command() {
   fi
 }
 
+# Remove a file, symlink, or directory when present.
 remove_path() {
   local path="$1"
   local parent

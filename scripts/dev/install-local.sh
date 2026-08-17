@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
+# Install a local development build.
 set -Eeuo pipefail
 
+# Print supported command-line arguments.
 usage() {
   cat >&2 <<'EOF_USAGE'
 Usage: scripts/dev/install-local.sh [options]
@@ -63,6 +65,7 @@ case "$dist_dir" in
 *) dist_dir="$project_root/$dist_dir" ;;
 esac
 
+# Exit unless a required command is available.
 require_command() {
   local command_name="$1"
 
@@ -72,6 +75,7 @@ require_command() {
   fi
 }
 
+# Exit unless a required path exists.
 require_path() {
   local path="$1"
   local label="$2"
@@ -82,6 +86,7 @@ require_path() {
   fi
 }
 
+# Create a directory with the expected permissions.
 ensure_directory() {
   local directory="$1"
 
@@ -97,6 +102,7 @@ ensure_directory() {
   sudo mkdir -p "$directory"
 }
 
+# Replace the installed application bundle.
 replace_bundle() {
   local source="$1"
   local destination="$2"
@@ -122,6 +128,7 @@ replace_bundle() {
   sudo mv "$stage" "$destination"
 }
 
+# Replace an installed symbolic link.
 replace_symlink() {
   local source="$1"
   local destination="$2"
@@ -145,6 +152,7 @@ replace_symlink() {
   sudo mv "$stage" "$destination"
 }
 
+# Clear quarantine attributes from a directory tree.
 clear_quarantine_recursive() {
   local path="$1"
 

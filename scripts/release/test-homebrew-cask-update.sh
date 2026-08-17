@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# Test Homebrew cask updates.
 set -euo pipefail
 
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
@@ -24,6 +25,7 @@ git -C "${tap_dir}" -c user.name=test -c user.email=test@example.com \
   --version "${version}" \
   --sha "${sha}"
 
+# Assert that text contains an expected value.
 assert_contains() {
   local file="$1"
   local expected="$2"
@@ -34,6 +36,7 @@ assert_contains() {
   fi
 }
 
+# Assert that text excludes an unexpected value.
 assert_not_contains() {
   local file="$1"
   local unexpected="$2"
