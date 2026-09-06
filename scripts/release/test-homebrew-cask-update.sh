@@ -55,7 +55,11 @@ assert_contains "$cask" "sha256 \"${sha}\""
 assert_contains "$cask" "version \"${version}\""
 assert_contains "$cask" 'depends_on formula: "lua"'
 assert_contains "$cask" 'depends_on macos: :sonoma'
-assert_contains "$cask" 'system "xattr", "-dr", "com.apple.quarantine", "#{appdir}/EasyBarNative.app"'
+assert_contains "$cask" 'postflight_steps do'
+assert_contains "$cask" 'run "/usr/bin/xattr",'
+assert_contains "$cask" 'args: ["-dr", "com.apple.quarantine", "{{appdir}}/EasyBarNative.app"],'
+assert_contains "$cask" 'must_succeed: false'
+assert_not_contains "$cask" 'postflight do'
 assert_contains "$cask" 'app "EasyBarNative.app"'
 assert_contains "$cask" 'binary "#{appdir}/EasyBarNative.app/Contents/MacOS/easybar-native", target: "easybar-native"'
 assert_contains "$cask" '"~/.config/easybar-native",'

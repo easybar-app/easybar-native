@@ -46,8 +46,10 @@ cask "easybar-native" do
   depends_on formula: "lua"
   depends_on macos: :sonoma
 
-  postflight do
-    system "xattr", "-dr", "com.apple.quarantine", "#{appdir}/EasyBarNative.app"
+  postflight_steps do
+    run "/usr/bin/xattr",
+        args: ["-dr", "com.apple.quarantine", "{{appdir}}/EasyBarNative.app"],
+        must_succeed: false
   end
 
   app "EasyBarNative.app"
