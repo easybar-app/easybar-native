@@ -3,6 +3,7 @@ import Foundation
 
 /// Resolves the isolated runtime contract used by the `easybar-native` launcher.
 enum EasyBarNativeCLIProfile {
+  /// Native-specific relative paths used when a caller has not supplied an override.
   private static let pathDefaults = [
     SharedEnvironmentKeys.configPath: ".config/easybar-native/config.toml",
     SharedEnvironmentKeys.runtimeDirectory: ".local/state/easybar-native/runtime",

@@ -4,6 +4,7 @@ import EasyBarShared
 /// Process entry point for the native macOS menu-bar frontend.
 @main
 enum EasyBarNativeAppMain {
+  /// Native application identity, paths, and frontend capabilities passed to the shared runtime.
   static var identity: EasyBarApplicationIdentity {
     EasyBarApplicationIdentity(
       displayName: "EasyBar Native",

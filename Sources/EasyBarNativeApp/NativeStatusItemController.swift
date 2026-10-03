@@ -7,11 +7,22 @@ import SwiftUI
 /// Presents every EasyBar top-level widget as an independent native `NSStatusItem`.
 @MainActor
 final class NativeStatusItemController: EasyBarSurfaceController {
+  /// Shared services used to report frontend lifecycle events.
   private let context: EasyBarSurfaceContext
+
+  /// Observable state that supplies the current top-level widget surfaces.
   private let presentationModel: EasyBarPresentationModel
+
+  /// Native status items keyed by their stable EasyBar widget identifier.
   private var entries: [String: NativeStatusItemEntry] = [:]
+
+  /// Widget identifiers in the allocation order currently represented by `entries`.
   private var orderedIDs: [String] = []
+
+  /// Subscription that keeps native items synchronized with the shared presentation model.
   private var widgetSubscription: AnyCancellable?
+
+  /// Whether allocated status items should currently be visible to the user.
   private var isVisible = false
 
   /// Creates a status-item host for one shared EasyBar presentation context.
