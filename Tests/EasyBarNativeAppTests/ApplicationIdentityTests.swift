@@ -5,6 +5,10 @@ import XCTest
 @testable import EasyBarNativeApp
 
 final class ApplicationIdentityTests: XCTestCase {
+  func testNativePinsTheSharedIPCContract() {
+    XCTAssertEqual(easyBarIPCProtocolVersion, "2")
+  }
+
   func testNativeIdentityOwnsRuntimeAndUserData() {
     let identity = EasyBarNativeAppMain.identity
 
