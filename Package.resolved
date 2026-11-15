@@ -6,8 +6,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/easybar-app/easybar-kit",
       "state" : {
-        "revision" : "d86875fe534a260d3ef04c740dcab31f84b856ca",
-        "version" : "0.7.4"
+        "revision" : "ac424af79aa9b829bb6db13f123b64fcb3c36c26",
+        "version" : "0.7.5"
       }
     },
     {
